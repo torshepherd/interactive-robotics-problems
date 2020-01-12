@@ -1,37 +1,15 @@
-## Welcome to GitHub Pages
+## Interactive Robot Problems
 
-You can use the [editor on GitHub](https://github.com/torshepherd/interactive-robotics-problems/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+For now, this repo serves as my scratchpad for mocking up controllers, robot simulations, and experiments with potentially useful libraries, packages, and languages.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Bear in mind that code posted here is not production-ready or even working in most cases. Files should be read mostly as my train-of-thought when trying new things or practicing writing robot software.
 
-### Markdown
+### robottools.py
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+This is an experiment to develop generalized functions useful for multiple robot architectures. The goals are:
 
-```markdown
-Syntax highlighted code block
+1. Make functions general enough to be used across multiple codebases
+2. Make functions general enough to be used with various types of robots
+3. Prefer pure functions, as they retain the most extensibility and reusability
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/torshepherd/interactive-robotics-problems/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+The tools enclosed are intended mostly for robot control.
