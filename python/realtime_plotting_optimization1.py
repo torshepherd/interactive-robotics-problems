@@ -4,6 +4,7 @@ from scipy.integrate import odeint
 from scipy.interpolate import interp1d
 import pygame
 import matplotlib.pyplot as plt
+import robottools as rt
 
 R = [255,   0,   0]
 G = [0, 255,   0]
@@ -49,6 +50,16 @@ def J(u):
 
 
 def integrate_control_input_45(input_array, z_0):
+    '''
+    Pure function to integrate the robot dynamics using odeint from scipy.integrate.
+    
+    Arguments:
+        input_array
+        z_0
+        
+    Returns:
+        trajectory of states
+    '''
     u_array = np.reshape(input_array, [2, int(np.shape(input_array)[0] / 2)])
     v = interp1d(T_SPAN, u_array[0], kind='cubic', fill_value="extrapolate")
     w = interp1d(T_SPAN, u_array[1], kind='cubic', fill_value="extrapolate")
