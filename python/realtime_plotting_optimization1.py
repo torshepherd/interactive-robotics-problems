@@ -52,18 +52,18 @@ def J(u):
 def integrate_control_input_45(input_array, z_0):
     '''
     Pure function to integrate the robot dynamics using odeint from scipy.integrate.
-    
+
     Arguments:
         input_array
         z_0
-        
+
     Returns:
         trajectory of states
     '''
     u_array = np.reshape(input_array, [2, int(np.shape(input_array)[0] / 2)])
     v = interp1d(T_SPAN, u_array[0], kind='cubic', fill_value="extrapolate")
     w = interp1d(T_SPAN, u_array[1], kind='cubic', fill_value="extrapolate")
-    u_func = lambda t: [v(t), w(t)]
+    def u_func(t): return [v(t), w(t)]
 
     return odeint(dynamics, z_0, T_SPAN, args=(u_func,))
 
@@ -74,14 +74,14 @@ def integrate_control_input_1(input_array, z_0):
     u_array = np.reshape(input_array, [2, int(np.shape(input_array)[0] / 2)])
     u_array = np.transpose(u_array)
     for i in range(1, n):
-        sol[i, :] = integrate_step(u_array[i-1],sol[i-1,:],DT)
+        sol[i, :] = integrate_step(u_array[i-1], sol[i-1, :], DT)
         #sol[i, :] = DT * dynamics_i(sol[i - 1, :], i - 1, u_array) + sol[i-1,:]
 
     return sol
 
 
 def integrate_step(input_0, z_0, dt):
-    u_array = np.append([input_0], [[0,0]], axis=0)
+    u_array = np.append([input_0], [[0, 0]], axis=0)
     return z_0 + dt * dynamics_i(z_0, 0, u_array)
 
 
@@ -129,6 +129,7 @@ def draw_arrow(pt):
     to_draw = [project_screen(corner_1).tolist(), project_screen(
         tip).tolist(), project_screen(corner_2).tolist()]
     pygame.draw.aalines(screen, B, True, to_draw)
+
 
 screen.fill(W)
 
