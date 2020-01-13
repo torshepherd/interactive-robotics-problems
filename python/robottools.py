@@ -84,6 +84,7 @@ def mobilebot_integrate(states, motor_inputs, mb_params, dt):
     inputs = mobilebot_differential(motor_inputs, mb_params)
     return integrate_dynamics(mobilebot_dynamics, states, inputs, dt)
 
+
 def inverse_jacobian(reference, state, info):
     '''
     Control law that takes a reference state and current state and returns the invers jacobian control inputs to that referene.
@@ -92,15 +93,18 @@ def inverse_jacobian(reference, state, info):
         state = np.array([[x1], [x2], ..])
         info = [jacobian_function, args, ]
     '''
-    
+
+
 def double_pend_info_ij(L0, L1):
     return [lambda q: np.array([[-L0 * np.sin(q[0]) - L1*np.sin(q[0] + q[1]), -L1 * np.sin(q[0] + q[1])],
-                                [L0 * np.cos(q[0]) + L1 * np.cos(q[0] + q[1]), L1 * np.cos(q[0] + q[1])],
+                                [L0 * np.cos(q[0]) + L1 * np.cos(q[0] +
+                                                                 q[1]), L1 * np.cos(q[0] + q[1])],
                                 [0, 0],
                                 [0, 0],
                                 [0, 0],
                                 [1, 1]])
             ]
+
 
 def queue_controller_thread(reference_queue, state_queue, control_queue, control_law, info, default_state, recurrent=False):
     '''
@@ -111,13 +115,16 @@ def queue_controller_thread(reference_queue, state_queue, control_queue, control
         try:
             current_state = state_queue.get(block=False)
             current_reference = reference_queue.get(block=False)
-        except: pass
-        
+        except:
+            pass
+
         if recurrent:
-            inputs, recurrent_info = control_law(current_reference, current_state, info, recurrent_info)
+            inputs, recurrent_info = control_law(
+                current_reference, current_state, info, recurrent_info)
         else:
             inputs = control_law(current_reference, current_state, gains)
-        
+
         try:
             control_queue.put(inputs, block=False)
-        except: pass
+        except:
+            pass
