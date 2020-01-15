@@ -23,14 +23,6 @@ class DoublePendulum:
 # Function definitions
 
 
-def project_screen_2d(world_points, R, p, scale):
-    return np.matmul(R * scale, (world_points + p / scale)).astype(int)
-
-
-def project_world_2d(screen_points, R, p, scale):
-    return np.matmul(np.linalg.inv(R * scale), (screen_points)) - p / scale
-
-
 # Mutable variables
 display_size = (640, 480)
 done = False

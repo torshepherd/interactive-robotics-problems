@@ -3,8 +3,20 @@ from queue import Queue
 from threading import Thread
 
 
+def project_screen_2d(world_points, R, p, scale):
+    return np.matmul(R * scale, (world_points + p / scale)).astype(int)
+
+
+def project_world_2d(screen_points, R, p, scale):
+    return np.matmul(np.linalg.inv(R * scale), (screen_points)) - p / scale
+
+
 def integrate_dynamics(dynamics, states, inputs, dt):
     return states + dt * dynamics(states, inputs)
+
+
+def P2C_COLUMN_VECTOR(r, theta):
+    return r * np.array([[np.cos(theta)], [np.sin(theta)]])
 
 
 def balancebot_dynamics(states, inputs):
@@ -96,7 +108,7 @@ def inverse_jacobian(reference, state, info):
 
 
 def double_pend_info_ij(L0, L1):
-    return [lambda q: np.array([[-L0 * np.sin(q[0]) - L1*np.sin(q[0] + q[1]), -L1 * np.sin(q[0] + q[1])],
+    return [lambda q: np.array([[-L0 * np.sin(q[0]) - L1 * np.sin(q[0] + q[1]), -L1 * np.sin(q[0] + q[1])],
                                 [L0 * np.cos(q[0]) + L1 * np.cos(q[0] +
                                                                  q[1]), L1 * np.cos(q[0] + q[1])],
                                 [0, 0],
