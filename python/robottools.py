@@ -75,6 +75,8 @@ def balancebot_dynamics(states, inputs, Balancebot):
     x4_dot = (B.a_2 * (x2 ** 2) * np.sin(x1)
               + inputs
               - (B.a_2 * np.cos(x1) * x2_dot)) / B.a_1
+    
+    return np.array([x1_dot, x2_dot, x3_dot, x4_dot])
 
 
 def mobilebot_dynamics(states, inputs):
