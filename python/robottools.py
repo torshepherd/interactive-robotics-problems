@@ -2,6 +2,23 @@ import numpy as np
 from queue import Queue
 from threading import Thread
 
+g = 9.81
+
+
+class Balancebot:
+    def __init__(self, mass_beam, mass_wheel, intertia_beam, intertia_wheel, length_center_of_mass, radius_wheel):
+        self.m_b = mass_beam
+        self.m_w = mass_wheel
+        self.I_b = intertia_beam
+        self.I_w = intertia_wheel
+        self.L = length_center_of_mass
+        self.R_w = radius_wheel
+
+        self.a_1 = self.I_w + (self.m_b + self.m_w) * (self.R_w ** 2)
+        self.a_2 = self.m_b * self.R_w * self.L
+        self.a_3 = self.I_b + self.m_b * (self.L ** 2)
+        self.a_4 = self.m_b * g * self.L
+
 
 def project_screen_2d(world_points, R, p, scale):
     return np.matmul(R * scale, (world_points + p / scale)).astype(int)
@@ -19,7 +36,7 @@ def P2C_COLUMN_VECTOR(r, theta):
     return r * np.array([[np.cos(theta)], [np.sin(theta)]])
 
 
-def balancebot_dynamics(states, inputs):
+def balancebot_dynamics(states, inputs, Balancebot):
     '''
     Calculate the time derivatives of [states] subject to [inputs] for the balancebot model.
 
@@ -44,11 +61,20 @@ def balancebot_dynamics(states, inputs):
 
     The number of rows in [states] determines the model used. With one row, the model is the degenerate pendulum case. With two rows, the model is the side view balancebot. With three rows, the model is the top-viewed balancebot, including orientation. With five rows, the model includes position in world frame.
     '''
+    B = Balancebot
+    x1 = states[0, :]
+    x2 = states[1, :]
+    x3 = states[2, :]
+    x4 = states[3, :]
 
-    if np.shape(states)[0] == 1:
-        # Degenerate pendulum case, states = [theta]
-        pass
-    pass
+    x1_dot = x2
+    x2_dot = (B.a_4 * np.sin(x1)
+              - ((B.a_2 ** 2) / (2 * B.a_1)) * np.sin(2 * x1) * (x2 ** 2)
+              - (1 + (B.a_2 / B.a_1) * np.cos(x1)) * inputs) / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (np.cos(x1) ** 2))
+    x3_dot = x4
+    x4_dot = (B.a_2 * (x2 ** 2) * np.sin(x1)
+              + inputs
+              - (B.a_2 * np.cos(x1) * x2_dot)) / B.a_1
 
 
 def mobilebot_dynamics(states, inputs):
