@@ -35,8 +35,8 @@ class Leg:
 def draw_leg(leg):
     points = []
     points[0] = np.array([[0], [0]])
-    points[1] = points[0] + rt.P2C_COLUMN_VECTOR(leg.l_1, leg.theta_1)
-    points[2] = points[1] + rt.P2C_COLUMN_VECTOR(leg.l_2, leg.theta_2)
+    points[1] = points[0] + rt.polar2cart(leg.l_1, leg.theta_1)
+    points[2] = points[1] + rt.polar2cart(leg.l_2, leg.theta_2)
 
     pygame.draw.aalines(screen, K, False, [rt.project_screen_2d(
         np.transpose(pt), R, P, SCALE) for pt in points])

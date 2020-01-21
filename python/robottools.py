@@ -1,6 +1,7 @@
 import numpy as np
 from queue import Queue
 from threading import Thread
+from numpy import sin, cos
 
 g = 9.81
 
@@ -32,8 +33,8 @@ def integrate_dynamics(dynamics, states, inputs, dt):
     return states + dt * dynamics(states, inputs)
 
 
-def P2C_COLUMN_VECTOR(r, theta):
-    return r * np.array([[np.cos(theta)], [np.sin(theta)]])
+def polar2cart(r, theta):
+    return r * np.array([[cos(theta)], [sin(theta)]])
 
 
 def balancebot_dynamics(states, inputs, Balancebot):
@@ -68,13 +69,13 @@ def balancebot_dynamics(states, inputs, Balancebot):
     x4 = states[3, :]
 
     x1_dot = x2
-    x2_dot = (B.a_4 * np.sin(x1)
-              - ((B.a_2 ** 2) / (2 * B.a_1)) * np.sin(2 * x1) * (x2 ** 2)
-              - (1 + (B.a_2 / B.a_1) * np.cos(x1)) * inputs) / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (np.cos(x1) ** 2))
+    x2_dot = (B.a_4 * sin(x1)
+              - ((B.a_2 ** 2) / (2 * B.a_1)) * sin(2 * x1) * (x2 ** 2)
+              - (1 + (B.a_2 / B.a_1) * cos(x1)) * inputs) / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (cos(x1) ** 2))
     x3_dot = x4
-    x4_dot = (B.a_2 * (x2 ** 2) * np.sin(x1)
+    x4_dot = (B.a_2 * (x2 ** 2) * sin(x1)
               + inputs
-              - (B.a_2 * np.cos(x1) * x2_dot)) / B.a_1
+              - (B.a_2 * cos(x1) * x2_dot)) / B.a_1
     
     return np.array([x1_dot, x2_dot, x3_dot, x4_dot])
 
@@ -105,8 +106,8 @@ def mobilebot_dynamics(states, inputs):
     x, y, theta = states
     v, w = inputs
 
-    return np.array([v * np.cos(theta),
-                     v * np.sin(theta),
+    return np.array([v * cos(theta),
+                     v * sin(theta),
                      w])
 
 
@@ -136,9 +137,9 @@ def inverse_jacobian(reference, state, info):
 
 
 def double_pend_info_ij(L0, L1):
-    return [lambda q: np.array([[-L0 * np.sin(q[0]) - L1 * np.sin(q[0] + q[1]), -L1 * np.sin(q[0] + q[1])],
-                                [L0 * np.cos(q[0]) + L1 * np.cos(q[0] +
-                                                                 q[1]), L1 * np.cos(q[0] + q[1])],
+    return [lambda q: np.array([[-L0 * sin(q[0]) - L1 * sin(q[0] + q[1]), -L1 * sin(q[0] + q[1])],
+                                [L0 * cos(q[0]) + L1 * cos(q[0] +
+                                                                 q[1]), L1 * cos(q[0] + q[1])],
                                 [0, 0],
                                 [0, 0],
                                 [0, 0],
