@@ -37,7 +37,7 @@ def polar2cart(r, theta):
     return r * np.array([[cos(theta)], [sin(theta)]])
 
 
-def balancebot_dynamics(states, inputs, Balancebot):
+def balancebot_dynamics(states, inputs, B):
     '''
     Calculate the time derivatives of [states] subject to [inputs] for the balancebot model.
 
@@ -62,20 +62,19 @@ def balancebot_dynamics(states, inputs, Balancebot):
 
     The number of rows in [states] determines the model used. With one row, the model is the degenerate pendulum case. With two rows, the model is the side view balancebot. With three rows, the model is the top-viewed balancebot, including orientation. With five rows, the model includes position in world frame.
     '''
-    B = Balancebot
-    x1 = states[0, :]
-    x2 = states[1, :]
-    x3 = states[2, :]
-    x4 = states[3, :]
+    x1, x2, x3, x4 = states
+    u = inputs
 
     x1_dot = x2
     x2_dot = (B.a_4 * sin(x1)
               - ((B.a_2 ** 2) / (2 * B.a_1)) * sin(2 * x1) * (x2 ** 2)
-              - (1 + (B.a_2 / B.a_1) * cos(x1)) * inputs) / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (cos(x1) ** 2))
+              - (1 + (B.a_2 / B.a_1) * cos(x1)) * u)
+              / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (cos(x1) ** 2))
     x3_dot = x4
     x4_dot = (B.a_2 * (x2 ** 2) * sin(x1)
-              + inputs
-              - (B.a_2 * cos(x1) * x2_dot)) / B.a_1
+              + u
+              - (B.a_2 * cos(x1) * x2_dot))
+              / B.a_1
     
     return np.array([x1_dot, x2_dot, x3_dot, x4_dot])
 
