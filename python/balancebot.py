@@ -84,12 +84,13 @@ while not done:
     previous_e_2 = 0
     x3_ref = 0
     clicked = 0
-    x3_limit = 2 * pi
+    x3_limit = 1 * pi
     standing = True
     while standing:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+                standing = False
 
             # Click parsing
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -105,6 +106,8 @@ while not done:
         # Compute time difference
         time_diff = time() - prev_time
         prev_time = time()
+        if time_diff == 0:
+            time_diff = 0.001
         
         # Limit wheel angle reference to avoid instability
         if x3_ref - states[2, 0] > x3_limit:
