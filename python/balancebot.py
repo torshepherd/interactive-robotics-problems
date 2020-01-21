@@ -60,9 +60,9 @@ standing = True
 # mass_beam, mass_wheel, inertia_beam, inertia_wheel, length_center_of_mass, radius_wheel
 B = rt.Balancebot(1, 0.06, 0.006, 0.000048, .1, 0.04)
 
-# Kp, Ki, Kd
-D1 = rt.PID(-1, -.1, -.1)
-D2 = rt.PID(.018, 0.000, 0.003)
+# Kp, Kd, Ki
+D1 = rt.PID(-2.5, -.2, -.1)
+D2 = rt.PID(.02, 0.000, 0.003)
 
 # Initialization
 pygame.init()
