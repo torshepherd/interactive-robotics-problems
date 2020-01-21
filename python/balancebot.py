@@ -12,6 +12,7 @@ W = np.array((255, 255, 255))
 BACKGROUND_COLOR = W
 TITLE = 'balancebot'
 FPS = 60
+SCALE = 500
 
 # Class definitions
 
@@ -23,20 +24,19 @@ def draw_balancebot(B, states):
     x3 = states[2, 0]
     x4 = states[3, 0]
 
-    scaling = 100
     o = np.array([320, 400])
     draw_center = np.array(
-        o + scaling * np.array([B.R_w * x3, -B.R_w])).astype(int)
-    draw_com = np.array(draw_center + scaling * B.L *
+        o + SCALE * np.array([B.R_w * x3, -B.R_w])).astype(int)
+    draw_com = np.array(draw_center + SCALE * B.L *
                         np.array([np.sin(x1), -np.cos(x1)])).astype(int)
-    draw_wheel = np.array(draw_center + scaling * B.R_w *
+    draw_wheel = np.array(draw_center + SCALE * B.R_w *
                           np.array([np.sin(x3), -np.cos(x3)])).astype(int)
 
     pygame.draw.aaline(screen, K, [0, 400], [640, 400])
     pygame.draw.aaline(screen, K, draw_center, draw_com)
 
-    pygame.draw.circle(screen, W, draw_center, int(B.R_w * scaling), 0)
-    pygame.draw.circle(screen, K, draw_center, int(B.R_w * scaling), 1)
+    pygame.draw.circle(screen, W, draw_center, int(B.R_w * SCALE), 0)
+    pygame.draw.circle(screen, K, draw_center, int(B.R_w * SCALE), 1)
     pygame.draw.aaline(screen, K, draw_center, draw_wheel)
 
 
@@ -58,35 +58,23 @@ x3_ref = 0
 
 # Instances
 # mass_beam, mass_wheel, inertia_beam, inertia_wheel, length_center_of_mass, radius_wheel
-B = rt.Balancebot(10, 0.6, 0.06, 0.00048, 1, 0.4)
-D1 = rt.PID(-80, -20, -100)
-D2 = rt.PID(.1, 0.000, 0.0001)
+B = rt.Balancebot(1, 0.06, 0.006, 0.000048, .1, 0.04)
+D1 = rt.PID(-1, -.1, -.1)
+D2 = rt.PID(.018, 0.000, 0.003)
 
 # Initialization
 pygame.init()
 screen = pygame.display.set_mode(display_size, 0)
 pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
+pt = 36
+font = pygame.font.SysFont('lucidasansregular', pt)
 
 # Main display loop
 while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-
-        # User input
-        # WASD parsing
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                x3_ref += 1
-            if event.key == pygame.K_d:
-                x3_ref += -1
-
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
-                pass
-            if event.key == pygame.K_d:
-                pass
 
     # Logic
     # Compute time differencing
@@ -100,7 +88,7 @@ while not done:
                                                           previous_e_2,
                                                           time_diff,
                                                           D2)
-    
+
     inputs, integrated_e_1, previous_e_1 = rt.PID_control(x1_ref,
                                                           states[0, 0],
                                                           integrated_e_1,
@@ -126,16 +114,14 @@ while not done:
         fps = int(1 / time_diff)
 
     text_string = str(fps)
-    pt = 36
-    font = pygame.font.SysFont('lucidasansregular', pt)
     text_obj = font.render(text_string, True, K, W)
     text_rect = text_obj.get_rect(topleft=[0, 0])
     screen.blit(text_obj, text_rect)
-    print(x1_ref)
 
     draw_balancebot(B, states)
 
     pygame.display.flip()
+    clock.tick(120)
 
 pygame.quit()
 quit()
