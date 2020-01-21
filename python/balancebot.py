@@ -63,8 +63,10 @@ D2 = rt.PID(.018, 0.000, 0.003)
 
 # Initialization
 pygame.init()
-screen = pygame.display.set_mode(display_size, 0)
 pygame.display.set_caption(TITLE)
+icon_surf = pygame.image.load('logo_small.png')
+pygame.display.set_icon(icon_surf)
+screen = pygame.display.set_mode(display_size, 0)
 clock = pygame.time.Clock()
 pt = 36
 font = pygame.font.SysFont('lucidasansregular', pt)
