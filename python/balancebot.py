@@ -1,7 +1,9 @@
 import robottools as rt
 import numpy as np
 import pygame
-import time
+from time import time
+from robottools import PID_control, integrate_dynamics
+from numpy import pi
 
 # Immutable variables
 K = np.array((0, 0, 0))
@@ -11,13 +13,11 @@ B = np.array((0, 0, 255))
 W = np.array((255, 255, 255))
 BACKGROUND_COLOR = W
 TITLE = 'balancebot'
-FPS = 60
 SCALE = 500
 
-# Class definitions
-
-
 # Function definitions
+
+
 def draw_balancebot(B, states):
     x1 = states[0, 0]
     x2 = states[1, 0]
@@ -38,14 +38,22 @@ def draw_balancebot(B, states):
     pygame.draw.circle(screen, W, draw_center, int(B.R_w * SCALE), 0)
     pygame.draw.circle(screen, K, draw_center, int(B.R_w * SCALE), 1)
     pygame.draw.aaline(screen, K, draw_center, draw_wheel)
+    
+def draw_ticker(B, x3_ref):
+    o = np.array([320, 400])
+    draw_center = np.array(
+        o + SCALE * np.array([B.R_w * x3_ref, 0])).astype(int)
+    draw_endpt = np.array(draw_center + np.array([0, 10]))
+    
+    pygame.draw.aaline(screen, K, draw_center, draw_endpt)
 
 
 # Mutable variables
 display_size = [640, 480]
 done = False
 fps = 0
-prev_time = time.time()
-states = np.array([[0.05],
+prev_time = time()
+states = np.array([[0.02],
                    [0],
                    [0],
                    [0]])
@@ -55,10 +63,14 @@ previous_e_1 = 0
 integrated_e_2 = 0
 previous_e_2 = 0
 x3_ref = 0
+clicked = 0
+x3_limit = 2 * pi
 
 # Instances
 # mass_beam, mass_wheel, inertia_beam, inertia_wheel, length_center_of_mass, radius_wheel
 B = rt.Balancebot(1, 0.06, 0.006, 0.000048, .1, 0.04)
+
+# Kp, Kd, Ki
 D1 = rt.PID(-1, -.1, -.1)
 D2 = rt.PID(.018, 0.000, 0.003)
 
@@ -76,52 +88,72 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
 
-    # Logic
-    # Compute time differencing
-    time_diff = time.time() - prev_time
-    prev_time = time.time()
+        # Click parsing
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                clicked += 1
+                clicked %= 2
 
-    # Run PID control
-    x1_ref, integrated_e_2, previous_e_2 = rt.PID_control(x3_ref,
-                                                          states[2, 0],
-                                                          integrated_e_2,
-                                                          previous_e_2,
-                                                          time_diff,
-                                                          D2)
+    # Mouse parsing
+    if clicked == 1:
+        x = pygame.mouse.get_pos()[0]
+        x3_ref = ((x - 320) / (SCALE * B.R_w))
 
-    inputs, integrated_e_1, previous_e_1 = rt.PID_control(x1_ref,
-                                                          states[0, 0],
-                                                          integrated_e_1,
-                                                          previous_e_1,
-                                                          time_diff,
-                                                          D1)
+    # Compute time difference
+    time_diff = time() - prev_time
+    prev_time = time()
+    
+    # Limit wheel angle reference to avoid instability
+    if x3_ref - states[2, 0] > x3_limit:
+        x3_ref_sat = states[2, 0] + x3_limit
+    elif x3_ref - states[2, 0] < -x3_limit:
+        x3_ref_sat = states[2, 0] - x3_limit
+    else:
+        x3_ref_sat = x3_ref
+
+    # Run PID control on wheel angle -> body angle
+    x1_ref, integrated_e_2, previous_e_2 = PID_control(x3_ref_sat,
+                                                       states[2, 0],
+                                                       integrated_e_2,
+                                                       previous_e_2,
+                                                       time_diff,
+                                                       D2)
+
+    # Run PID control on body angle -> motor torque
+    inputs, integrated_e_1, previous_e_1 = PID_control(x1_ref,
+                                                       states[0, 0],
+                                                       integrated_e_1,
+                                                       previous_e_1,
+                                                       time_diff,
+                                                       D1)
 
     # March states
-    states = rt.integrate_dynamics(rt.balancebot_dynamics,
-                                   states,
-                                   inputs,
-                                   time_diff,
-                                   B)
+    states = integrate_dynamics(rt.balancebot_dynamics,
+                                states,
+                                inputs,
+                                time_diff,
+                                B)
 
     # Wrap by 2pi
-    if abs(states[0, 0]) > (2 * np.pi / 3):
+    if abs(states[0, 0]) > (2 * pi / 3):
         states[1, 0] = 0
-    states[0, 0] = (states[0, 0] + np.pi) % (np.pi * 2) - np.pi
+
+    if time_diff != 0:
+        fps = int(1 / time_diff)
+    text_string = str(fps)
 
     # Drawing
     screen.fill(BACKGROUND_COLOR)
-    if time_diff != 0:
-        fps = int(1 / time_diff)
 
-    text_string = str(fps)
     text_obj = font.render(text_string, True, K, W)
     text_rect = text_obj.get_rect(topleft=[0, 0])
     screen.blit(text_obj, text_rect)
 
     draw_balancebot(B, states)
+    draw_ticker(B, x3_ref)
 
     pygame.display.flip()
-    clock.tick(120)
+    clock.tick(200)
 
 pygame.quit()
 quit()
