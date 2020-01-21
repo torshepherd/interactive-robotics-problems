@@ -7,11 +7,11 @@ g = 9.81
 
 
 class Balancebot:
-    def __init__(self, mass_beam, mass_wheel, intertia_beam, intertia_wheel, length_center_of_mass, radius_wheel):
+    def __init__(self, mass_beam, mass_wheel, inertia_beam, inertia_wheel, length_center_of_mass, radius_wheel):
         self.m_b = mass_beam
         self.m_w = mass_wheel
-        self.I_b = intertia_beam
-        self.I_w = intertia_wheel
+        self.I_b = inertia_beam
+        self.I_w = inertia_wheel
         self.L = length_center_of_mass
         self.R_w = radius_wheel
 
@@ -29,8 +29,8 @@ def project_world_2d(screen_points, R, p, scale):
     return np.matmul(np.linalg.inv(R * scale), (screen_points)) - p / scale
 
 
-def integrate_dynamics(dynamics, states, inputs, dt):
-    return states + dt * dynamics(states, inputs)
+def integrate_dynamics(dynamics, states, inputs, dt, arg):
+    return states + dt * dynamics(states, inputs, arg)
 
 
 def polar2cart(r, theta):
@@ -68,13 +68,11 @@ def balancebot_dynamics(states, inputs, B):
     x1_dot = x2
     x2_dot = (B.a_4 * sin(x1)
               - ((B.a_2 ** 2) / (2 * B.a_1)) * sin(2 * x1) * (x2 ** 2)
-              - (1 + (B.a_2 / B.a_1) * cos(x1)) * u)
-              / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (cos(x1) ** 2))
+              - (1 + (B.a_2 / B.a_1) * cos(x1)) * u) / (B.a_3 - ((B.a_2 ** 2) / B.a_1) * (cos(x1) ** 2))
     x3_dot = x4
     x4_dot = (B.a_2 * (x2 ** 2) * sin(x1)
               + u
-              - (B.a_2 * cos(x1) * x2_dot))
-              / B.a_1
+              - (B.a_2 * cos(x1) * x2_dot)) / B.a_1
     
     return np.array([x1_dot, x2_dot, x3_dot, x4_dot])
 
