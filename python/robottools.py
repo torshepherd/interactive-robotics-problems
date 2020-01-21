@@ -19,6 +19,12 @@ class Balancebot:
         self.a_2 = self.m_b * self.R_w * self.L
         self.a_3 = self.I_b + self.m_b * (self.L ** 2)
         self.a_4 = self.m_b * g * self.L
+        
+class PID:
+    def __init__(self, kp, ki, kd):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
 
 
 def project_screen_2d(world_points, R, p, scale):
@@ -142,7 +148,10 @@ def double_pend_info_ij(L0, L1):
                                 [0, 0],
                                 [1, 1]])
             ]
-
+def PID_control(reference, state, running_total, previous_error, dt, PID):
+    error = reference - state
+    output = PID.kp * (error) + PID.ki * (error + running_total) + PID.kd * (error - previous_error) / dt
+    return output, running_total + error, error
 
 def queue_controller_thread(reference_queue, state_queue, control_queue, control_law, info, default_state, recurrent=False):
     '''
