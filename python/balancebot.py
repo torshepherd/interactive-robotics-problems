@@ -77,7 +77,7 @@ font = pygame.font.SysFont('lucidasansregular', 36)
 while not done:
     fps = 0
     prev_time = time()
-    states = np.array([[0.02],
+    states = np.array([[0.05],
                        [0],
                        [0],
                        [0]])
