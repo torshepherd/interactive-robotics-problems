@@ -13,10 +13,10 @@ BACKGROUND_COLOR = W
 TITLE = 'leg_vis_nocontrol'
 FPS = 60
 
-DT = 0.25  # When to move to next point
+DT = 0.01  # When to move to next point
 R = np.array([[1, 0], [0, -1]])
 P = np.array([[320], [-140]])
-SCALE = 500
+SCALE = 50
 
 points = np.loadtxt('leg_0.traj', delimiter=',')
 num_points = np.shape(points)[0]
@@ -25,7 +25,8 @@ num_points = np.shape(points)[0]
 
 
 def convert_point(world_point):
-    return np.array([world_point[1:]])
+    return np.array([world_point]) - np.array([0, 2])
+    # return np.array([world_point[1:]])
 
 
 # Mutable variables
